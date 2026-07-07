@@ -1,6 +1,9 @@
 .git
 .agents
 .codex
+.vscode/*.db
+.vscode/*.db-shm
+.vscode/*.db-wal
 data
 workspace/build
 workspace/install
