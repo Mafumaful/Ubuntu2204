@@ -3,6 +3,14 @@ ARG BASE_IMAGE=ros:humble
 FROM ${BASE_IMAGE} AS openpi-builder
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG http_proxy
+ARG https_proxy
+ARG all_proxy
+ARG no_proxy
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG ALL_PROXY
+ARG NO_PROXY
 ARG UBUNTU_APT_MIRROR=https://mirrors.tuna.tsinghua.edu.cn/ubuntu
 ARG ROS_APT_MIRROR=https://mirrors.tuna.tsinghua.edu.cn/ros2/ubuntu
 ARG PYPI_MIRROR=https://pypi.tuna.tsinghua.edu.cn/simple
@@ -65,6 +73,14 @@ RUN test "$(/openpi/.venv/bin/python -c 'import transformers; print(transformers
 FROM ${BASE_IMAGE} AS runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG http_proxy
+ARG https_proxy
+ARG all_proxy
+ARG no_proxy
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG ALL_PROXY
+ARG NO_PROXY
 ARG USER_NAME=ros
 ARG USER_UID=1000
 ARG USER_GID=1000

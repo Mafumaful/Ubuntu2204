@@ -3,7 +3,17 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
       args:
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        all_proxy: ${all_proxy:-}
+        no_proxy: ${no_proxy:-}
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        ALL_PROXY: ${ALL_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
         USER_NAME: ${USER_NAME:-ros}
         USER_UID: ${USER_UID:-1000}
         USER_GID: ${USER_GID:-1000}

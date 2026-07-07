@@ -45,6 +45,26 @@ GIT_URL_REWRITE_TO=
 
 `UV_PYTHON_INSTALL_MIRROR` 用于 uv 下载 Python 3.11。如果你有 python-build-standalone 的内网镜像，可以填这个变量；默认留空，避免写死不稳定的公共 GitHub 代理。
 
+如果 `git clone` openpi 卡住，可以在同一个终端先启用宿主机代理再构建：
+
+```bash
+proxyon
+docker compose build
+```
+
+`proxyon` 会导出 `http_proxy`、`https_proxy`、`all_proxy` 等变量；Compose 会把它们作为 build args 传给 Docker build。构建阶段也配置了 `host.docker.internal:host-gateway`，所以 `http://host.docker.internal:17891` 这类代理地址在 build 容器里可解析。
+
+也可以手动写入 `.env`：
+
+```bash
+http_proxy=http://host.docker.internal:17891
+https_proxy=http://host.docker.internal:17891
+all_proxy=socks5://host.docker.internal:17891
+HTTP_PROXY=http://host.docker.internal:17891
+HTTPS_PROXY=http://host.docker.internal:17891
+ALL_PROXY=socks5://host.docker.internal:17891
+```
+
 ## 启动模式
 
 进入交互 shell：
