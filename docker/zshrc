@@ -1,0 +1,50 @@
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+
+plugins=(
+  git
+  z
+  docker
+  npm
+  extract
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
+
+if [ -r "$ZSH/oh-my-zsh.sh" ]; then
+  source "$ZSH/oh-my-zsh.sh"
+else
+  PROMPT='%n@%m:%~%# '
+fi
+
+alias python="python3"
+alias ll="ls -alF"
+alias ws="cd $HOME/ws"
+
+proxyon() {
+  local proxy_host="${PROXY_HOST:-host.docker.internal}"
+  local proxy_port="${PROXY_PORT:-17891}"
+  export http_proxy="http://${proxy_host}:${proxy_port}"
+  export https_proxy="http://${proxy_host}:${proxy_port}"
+  export all_proxy="socks5://${proxy_host}:${proxy_port}"
+  export HTTP_PROXY="$http_proxy"
+  export HTTPS_PROXY="$https_proxy"
+  export ALL_PROXY="$all_proxy"
+  echo "Proxy ON: ${proxy_host}:${proxy_port}"
+}
+
+proxyoff() {
+  unset http_proxy https_proxy all_proxy
+  unset HTTP_PROXY HTTPS_PROXY ALL_PROXY
+  echo "Proxy OFF"
+}
+
+source "/opt/ros/${ROS_DISTRO:-humble}/setup.zsh"
+
+if [ -f "$HOME/ws/install/setup.zsh" ]; then
+  source "$HOME/ws/install/setup.zsh"
+fi
+
+export DATA_DIR="${DATA_DIR:-/data}"
+export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-0}"
+export COLCON_HOME="${COLCON_HOME:-$HOME/.colcon}"

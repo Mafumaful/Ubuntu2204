@@ -1,0 +1,40 @@
+services:
+  ros2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        USER_NAME: ${USER_NAME:-ros}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+        ROS_DISTRO: humble
+        ROS_APT_MIRROR: ${ROS_APT_MIRROR:-https://mirrors.tuna.tsinghua.edu.cn/ros2/ubuntu}
+        ROS_KEY_URL: ${ROS_KEY_URL:-https://mirrors.tuna.tsinghua.edu.cn/rosdistro/ros.key}
+        OH_MY_ZSH_REPO: ${OH_MY_ZSH_REPO:-https://gitee.com/mirrors/oh-my-zsh.git}
+        ZSH_AUTOSUGGESTIONS_REPO: ${ZSH_AUTOSUGGESTIONS_REPO:-https://gitee.com/mirrors/zsh-autosuggestions.git}
+        ZSH_SYNTAX_HIGHLIGHTING_REPO: ${ZSH_SYNTAX_HIGHLIGHTING_REPO:-https://gitee.com/mirrors/zsh-syntax-highlighting.git}
+    image: ros2-humble-zsh:latest
+    container_name: ros2-humble-dev
+    hostname: ros2-humble-dev
+    stdin_open: true
+    tty: true
+    environment:
+      USER_NAME: ${USER_NAME:-ros}
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      TZ: ${TZ:-Asia/Shanghai}
+      DATA_DIR: /data
+      PROXY_HOST: host.docker.internal
+      PROXY_PORT: "17891"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "7400-7600:7400-7600/udp"
+      - "7400-7600:7400-7600/tcp"
+      - "8080:8080"
+      - "8765:8765"
+    volumes:
+      - ./workspace:/home/${USER_NAME:-ros}/ws
+      - ./data:/data
+      - ./config:/config
+    working_dir: /home/${USER_NAME:-ros}/ws
+    command: zsh

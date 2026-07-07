@@ -1,0 +1,41 @@
+# Local environment
+.env
+*.local
+
+# ROS 2 / colcon build outputs
+workspace/build/
+workspace/install/
+workspace/log/
+
+# Runtime data mounted into the container
+data/*
+!data/.gitkeep
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# C/C++ and editor-generated indexes
+compile_commands.json
+.cache/
+.vscode/*.db
+.vscode/*.db-shm
+.vscode/*.db-wal
+
+# Editor and OS noise
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+tmp/
+temp/

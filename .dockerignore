@@ -1,0 +1,10 @@
+.git
+.agents
+.codex
+data
+workspace/build
+workspace/install
+workspace/log
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
