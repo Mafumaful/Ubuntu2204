@@ -52,7 +52,7 @@ proxyon
 docker compose build
 ```
 
-`proxyon` 会导出 `http_proxy`、`https_proxy`、`all_proxy` 等变量；Compose 会把它们作为 build args 传给 Docker build。构建阶段也配置了 `host.docker.internal:host-gateway`，所以 `http://host.docker.internal:17891` 这类代理地址在 build 容器里可解析。
+`proxyon` 会导出 `http_proxy`、`https_proxy`、`all_proxy` 等变量；Compose 会把它们作为 build args 传给 Docker build。构建阶段也配置了 `host.docker.internal:host-gateway`，所以 `http://host.docker.internal:17891` 这类代理地址在 build 容器里可解析。详情可以参考 @./scripts。
 
 也可以手动写入 `.env`：
 
@@ -86,6 +86,14 @@ docker compose run --rm ros2 pi0-stack
 ```
 
 `compose.yaml` 和 `docker-compose.yml` 已启用 `network_mode: host`、`gpus: all`、`shm_size: 8gb` 和 openpi cache volume。host network 下不配置 `ports` 映射。
+
+默认启动 GPU：
+
+```bash
+docker compose up -d
+```
+
+如果需要临时无 GPU 启动，注释掉 compose 文件里的 `gpus: all` 这一行再启动。
 
 ## openpi 配置
 
