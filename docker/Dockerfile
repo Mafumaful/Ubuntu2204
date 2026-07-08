@@ -33,8 +33,8 @@ ENV LANG=en_US.UTF-8 \
 
 RUN set -eux; \
     if [ -n "${GIT_URL_REWRITE_TO}" ]; then git config --system url."${GIT_URL_REWRITE_TO}".insteadOf "${GIT_URL_REWRITE_FROM}"; fi; \
-    sed -i "s|http://archive.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g; s|http://security.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g" /etc/apt/sources.list; \
-    find /etc/apt/sources.list.d -type f -name '*ros*' -print0 | xargs -0 -r sed -i "s|http://packages.ros.org/ros2/ubuntu|${ROS_APT_MIRROR}|g"; \
+    sed -i "s|http://archive.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g; s|http://security.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g; s|https://archive.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g; s|https://security.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g" /etc/apt/sources.list; \
+    find /etc/apt/sources.list.d -type f -print0 | xargs -0 -r sed -i "s|http://packages.ros.org/ros2/ubuntu|${ROS_APT_MIRROR}|g; s|https://packages.ros.org/ros2/ubuntu|${ROS_APT_MIRROR}|g"; \
     printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' > /etc/apt/apt.conf.d/80-retries-timeouts; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -117,8 +117,8 @@ ENV LANG=en_US.UTF-8 \
 
 RUN set -eux; \
     if [ -n "${GIT_URL_REWRITE_TO}" ]; then git config --system url."${GIT_URL_REWRITE_TO}".insteadOf "${GIT_URL_REWRITE_FROM}"; fi; \
-    sed -i "s|http://archive.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g; s|http://security.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g" /etc/apt/sources.list; \
-    find /etc/apt/sources.list.d -type f -name '*ros*' -print0 | xargs -0 -r sed -i "s|http://packages.ros.org/ros2/ubuntu|${ROS_APT_MIRROR}|g"; \
+    sed -i "s|http://archive.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g; s|http://security.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g; s|https://archive.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g; s|https://security.ubuntu.com/ubuntu|${UBUNTU_APT_MIRROR}|g" /etc/apt/sources.list; \
+    find /etc/apt/sources.list.d -type f -print0 | xargs -0 -r sed -i "s|http://packages.ros.org/ros2/ubuntu|${ROS_APT_MIRROR}|g; s|https://packages.ros.org/ros2/ubuntu|${ROS_APT_MIRROR}|g"; \
     printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' > /etc/apt/apt.conf.d/80-retries-timeouts; \
     apt-get update; \
     apt-get install -y --no-install-recommends \

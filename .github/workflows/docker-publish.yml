@@ -81,6 +81,14 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            UBUNTU_APT_MIRROR=http://archive.ubuntu.com/ubuntu
+            ROS_APT_MIRROR=http://packages.ros.org/ros2/ubuntu
+            PYPI_MIRROR=https://pypi.org/simple
+            HF_ENDPOINT=https://huggingface.co
+            OH_MY_ZSH_REPO=https://github.com/ohmyzsh/ohmyzsh.git
+            ZSH_AUTOSUGGESTIONS_REPO=https://github.com/zsh-users/zsh-autosuggestions.git
+            ZSH_SYNTAX_HIGHLIGHTING_REPO=https://github.com/zsh-users/zsh-syntax-highlighting.git
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
