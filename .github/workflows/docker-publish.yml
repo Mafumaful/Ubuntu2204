@@ -106,3 +106,61 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+      - name: Notify Feishu
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          FEISHU_BOT_WEBHOOK: ${{ secrets.FEISHU_BOT_WEBHOOK }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          PACKAGE_URL: https://ghcr.io/${{ env.IMAGE_NAME }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.request
+
+          webhook = os.environ.get("FEISHU_BOT_WEBHOOK", "").strip()
+          if not webhook:
+              print("FEISHU_BOT_WEBHOOK is not set; skipping Feishu notification.")
+              sys.exit(0)
+
+          tags = [line.strip() for line in os.environ.get("TAGS", "").splitlines() if line.strip()]
+          digest = os.environ.get("DIGEST", "").strip()
+          image = os.environ.get("IMAGE", "").strip()
+          package_url = os.environ.get("PACKAGE_URL", "").strip()
+          pull_target = tags[0] if tags else image
+          digest_target = f"{image}@{digest}" if image and digest else ""
+
+          lines = [
+              "Docker image published",
+              f"Repository: {os.environ.get('GITHUB_REPOSITORY', '')}",
+              f"Image: {image}",
+              f"Package: {package_url}",
+              f"Pull: docker pull {pull_target}",
+          ]
+          if digest_target:
+              lines.append(f"Digest pull: docker pull {digest_target}")
+          if tags:
+              lines.append("Tags:")
+              lines.extend(f"- {tag}" for tag in tags)
+
+          payload = {
+              "msg_type": "text",
+              "content": {
+                  "text": "\n".join(lines),
+              },
+          }
+          data = json.dumps(payload).encode("utf-8")
+          request = urllib.request.Request(
+              webhook,
+              data=data,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          with urllib.request.urlopen(request, timeout=20) as response:
+              body = response.read().decode("utf-8", errors="replace")
+              print(f"Feishu webhook response: {response.status} {body}")
+          PY
