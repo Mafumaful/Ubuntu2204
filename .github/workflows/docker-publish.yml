@@ -36,6 +36,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
@@ -115,10 +117,12 @@ jobs:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           PACKAGE_URL: https://ghcr.io/${{ env.IMAGE_NAME }}
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
           python3 - <<'PY'
           import json
           import os
+          import subprocess
           import sys
           import urllib.request
 
@@ -133,16 +137,51 @@ jobs:
           package_url = os.environ.get("PACKAGE_URL", "").strip()
           pull_target = tags[0] if tags else image
           digest_target = f"{image}@{digest}" if image and digest else ""
+          repository = os.environ.get("GITHUB_REPOSITORY", "")
+          server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
+          run_id = os.environ.get("GITHUB_RUN_ID", "")
+          sha = os.environ.get("GITHUB_SHA", "")
+          ref_name = os.environ.get("GITHUB_REF_NAME", "")
+          before_sha = os.environ.get("BEFORE_SHA", "")
+          short_sha = sha[:12] if sha else ""
+          run_url = f"{server_url}/{repository}/actions/runs/{run_id}" if repository and run_id else ""
+          commit_url = f"{server_url}/{repository}/commit/{sha}" if repository and sha else ""
+          compare_url = ""
+          if repository and before_sha and sha and set(before_sha) != {"0"}:
+              compare_url = f"{server_url}/{repository}/compare/{before_sha}...{sha}"
+
+          change_range = sha
+          if before_sha and sha and set(before_sha) != {"0"}:
+              change_range = f"{before_sha}..{sha}"
+          try:
+              changes_output = subprocess.check_output(
+                  ["git", "log", "--no-merges", "--pretty=format:%h %s", change_range],
+                  text=True,
+                  stderr=subprocess.DEVNULL,
+              ).strip()
+          except Exception:
+              changes_output = ""
+          changes = [line for line in changes_output.splitlines() if line][:10]
+          if not changes and short_sha:
+              changes = [f"{short_sha} {os.environ.get('GITHUB_EVENT_NAME', '')} build"]
 
           lines = [
               "Docker image published",
-              f"Repository: {os.environ.get('GITHUB_REPOSITORY', '')}",
+              f"Repository: {repository}",
+              f"Version: {ref_name} @ {short_sha}",
+              f"Commit: {commit_url}",
+              f"Action: {run_url}",
               f"Image: {image}",
               f"Package: {package_url}",
               f"Pull: docker pull {pull_target}",
           ]
           if digest_target:
               lines.append(f"Digest pull: docker pull {digest_target}")
+          if compare_url:
+              lines.append(f"Compare: {compare_url}")
+          if changes:
+              lines.append("Changes:")
+              lines.extend(f"- {change}" for change in changes)
           if tags:
               lines.append("Tags:")
               lines.extend(f"- {tag}" for tag in tags)
