@@ -165,31 +165,58 @@ jobs:
           if not changes and short_sha:
               changes = [f"{short_sha} {os.environ.get('GITHUB_EVENT_NAME', '')} build"]
 
-          lines = [
-              "Docker image published",
-              f"Repository: {repository}",
-              f"Version: {ref_name} @ {short_sha}",
-              f"Commit: {commit_url}",
-              f"Action: {run_url}",
-              f"Image: {image}",
-              f"Package: {package_url}",
-              f"Pull: docker pull {pull_target}",
-          ]
-          if digest_target:
-              lines.append(f"Digest pull: docker pull {digest_target}")
-          if compare_url:
-              lines.append(f"Compare: {compare_url}")
-          if changes:
-              lines.append("Changes:")
-              lines.extend(f"- {change}" for change in changes)
-          if tags:
-              lines.append("Tags:")
-              lines.extend(f"- {tag}" for tag in tags)
+          def link(label, url):
+              return f"[{label}]({url})" if url else label
+
+          change_lines = "\n".join(f"- `{change}`" for change in changes[:8]) if changes else "- 无可用提交摘要"
+          tag_lines = "\n".join(f"- `{tag}`" for tag in tags[:8]) if tags else "- 无 tag 信息"
+          digest_short = digest[:24] + "..." if len(digest) > 27 else digest
+
+          markdown = "\n".join([
+              "**Docker 镜像发布成功**",
+              "",
+              f"**仓库**：{repository}",
+              f"**版本**：`{ref_name}` / `{short_sha}`",
+              f"**提交**：{link(short_sha or 'commit', commit_url)}",
+              f"**流水线**：{link('查看 GitHub Action', run_url)}",
+              f"**镜像包**：{link(image, package_url)}",
+              "",
+              "**拉取命令**",
+              f"```bash\ndocker pull {pull_target}\n```",
+              "",
+              "**Digest 拉取**",
+              f"```bash\ndocker pull {digest_target}\n```" if digest_target else "暂无 digest 信息",
+              f"**Digest**：`{digest_short}`" if digest_short else "",
+              "",
+              "**本次改动**",
+              change_lines,
+              f"\n{link('查看完整 diff', compare_url)}" if compare_url else "",
+              "",
+              "**发布标签**",
+              tag_lines,
+              "",
+              "_关键词：Docker image published_",
+          ])
 
           payload = {
-              "msg_type": "text",
-              "content": {
-                  "text": "\n".join(lines),
+              "msg_type": "interactive",
+              "card": {
+                  "config": {
+                      "wide_screen_mode": True,
+                  },
+                  "header": {
+                      "template": "green",
+                      "title": {
+                          "tag": "plain_text",
+                          "content": "Docker 镜像发布成功",
+                      },
+                  },
+                  "elements": [
+                      {
+                          "tag": "markdown",
+                          "content": markdown,
+                      },
+                  ],
               },
           }
           data = json.dumps(payload).encode("utf-8")
